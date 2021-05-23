@@ -23,5 +23,11 @@ fn unwrap_paragraph(p: &str) -> String {
 }
 
 fn classify(subject: &str) -> Option<ParagraphType> {
-    Some(ParagraphType::Text)
+    if subject.trim() == "" {
+        // Extraneous, unclassifiable whitespace.
+        return None
+    } else {
+        // Default to wrappable text.
+        return Some(ParagraphType::Text)
+    }
 }
