@@ -4,9 +4,13 @@ use textwrap::{fill};
 
 pub fn unwrap(raw: &str) -> String {
     let old: Vec<&str> = raw.split("\n\n").collect();
+    let ilast = old.len() - 1;
     let mut new = String::with_capacity(raw.len());
-    for p in old.iter() {
+    for (i, p) in old.iter().enumerate() {
         new.push_str(&unwrap_paragraph(p));
+        if i < ilast {
+            new.push_str("\n\n");
+        }
     }
     return new;
 }
