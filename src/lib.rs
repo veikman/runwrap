@@ -24,10 +24,30 @@ fn unwrap_paragraph(p: &str) -> String {
 
 fn classify(subject: &str) -> Option<ParagraphType> {
     if subject.trim() == "" {
-        // Extraneous, unclassifiable whitespace.
+        // Extraneous, unclassifiable whitespace to be left untouched.
         return None
     } else {
         // Default to wrappable text.
         return Some(ParagraphType::Text)
     }
+}
+
+#[test]
+fn classify_whitespace() {
+    assert!(matches!(classify(""), None));
+    assert!(matches!(classify(" "), None));
+    assert!(matches!(classify(" \n"), None));
+    assert!(matches!(classify("\n\n"), None));
+    assert!(matches!(classify("\n \n\n"), None));
+}
+#[test]
+fn classify_misc() {
+    assert!(matches!(classify("a"), Some(ParagraphType::Text)));
+    assert!(matches!(classify(" a"), Some(ParagraphType::Text)));
+    assert!(matches!(classify("a "), Some(ParagraphType::Text)));
+    assert!(matches!(classify("a\na"), Some(ParagraphType::Text)));
+    assert!(matches!(classify("a\na\na"), Some(ParagraphType::Text)));
+    assert!(matches!(classify("a\na\n\na"), Some(ParagraphType::Text)));
+    assert!(matches!(classify("^a"), Some(ParagraphType::Text)));
+    assert!(matches!(classify("`a`"), Some(ParagraphType::Text)));
 }
