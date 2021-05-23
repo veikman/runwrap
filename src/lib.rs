@@ -1,6 +1,4 @@
-use textwrap::{fill};
-
-// lines: Vec<&str> = p.split("\n").collect();
+use textwrap::{unfill};
 
 pub fn unwrap(raw: &str) -> String {
     let old: Vec<&str> = raw.split("\n\n").collect();
@@ -21,7 +19,7 @@ enum ParagraphType {
 
 fn unwrap_paragraph(p: &str) -> String {
     match classify(p) {
-        Some(ParagraphType::Text) => String::from(fill(p, usize::MAX)),
+        Some(ParagraphType::Text) => String::from(unfill(p).0),
         None => String::from(p),
     }
 }
