@@ -1,6 +1,10 @@
-use textwrap::{unfill};
+use textwrap::{unfill, dedent};
+use regex::bytes::Regex;
+use std::str;
 
 const BLANK: &str = "\n\n";
+
+const RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
 
 pub fn unwrap(raw: &str) -> String {
     let old: Vec<&str> = raw.split(BLANK).collect();
@@ -35,9 +39,11 @@ pub fn unwrap(raw: &str) -> String {
             ends_current_block = true;
         }
 
+        assert!(!(ends_previous_block && ends_current_block));
+
         if ends_previous_block {
             // Treat completed block. Append to output.
-            new.push_str(&unwrap_paragraph(&block));
+            new.push_str(&unwrap_paragraph(type_last, &block));
             if i < ilast {
                 new.push_str(BLANK);
             }
@@ -48,7 +54,7 @@ pub fn unwrap(raw: &str) -> String {
         }
         block.push_str(p);
         if ends_current_block {
-            new.push_str(&unwrap_paragraph(&block));
+            new.push_str(&unwrap_paragraph(type_head, &block));
             if i < ilast {
                 new.push_str(BLANK);
             }
@@ -59,7 +65,7 @@ pub fn unwrap(raw: &str) -> String {
     // Append any block not already finished, such as a Markdown list that ends the document, or an
     // XML block that is not properly terminated.
     if ! block.is_empty() {
-        new.push_str(&unwrap_paragraph(&block));
+        new.push_str(&unwrap_paragraph(type_last, &block));
     }
     return new;
 }
@@ -87,14 +93,34 @@ enum ParagraphType {
     XML,
 }
 
-fn unwrap_paragraph(p: &str) -> String {
-    match classify_head(p) {
+fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
+    match ptype {
         ParagraphType::Indented => String::from(p),
-        ParagraphType::List => String::from(unfill(p).0),
+        ParagraphType::List => unwrap_list(String::new(), &p.as_bytes().to_vec()),
         ParagraphType::Text => String::from(unfill(p).0),
         ParagraphType::Whitespace => String::from(p),
         ParagraphType::XML => String::from(p),
     }
+}
+
+fn unwrap_list(unwrapped: String, block: &[u8]) -> String {
+    let lead = RE_LI.captures(block).unwrap();
+    let n_indent = lead[0].len();
+    //println!("{}", String::from_utf8(lead[0]).unwrap());
+    unwrapped.push_str(std::str::from_utf8(&lead[0]).unwrap());
+    let str_indent = b" ".repeat(n_indent);
+    let beheaded = RE_LI.replace(block, str_indent);
+    let next = RE_LI.find(&beheaded);
+    let boundary: usize = match next {
+        Some(mat) => mat.start(),
+        None => beheaded.len(),
+    };
+    let wrapped = std::str::from_utf8(&beheaded[..boundary]).unwrap();
+    unwrapped.push_str(&unfill(&dedent(wrapped)).0);
+    if block[boundary..].is_empty() {
+        return unwrapped;
+    }
+    return unwrap_list(unwrapped, &block[boundary..]);
 }
 
 fn classify_head(subject: &str) -> ParagraphType {
