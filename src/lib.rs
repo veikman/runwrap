@@ -1,5 +1,5 @@
 use textwrap::{unfill, dedent};
-use regex::bytes::Regex;
+use regex::Regex;
 use std::str;
 
 const BLANK: &str = "\n\n";
@@ -96,27 +96,26 @@ enum ParagraphType {
 fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
     match ptype {
         ParagraphType::Indented => String::from(p),
-        ParagraphType::List => unwrap_list(String::new(), &p.as_bytes().to_vec()),
+        ParagraphType::List => unwrap_list(String::new(), &p),
         ParagraphType::Text => String::from(unfill(p).0),
         ParagraphType::Whitespace => String::from(p),
         ParagraphType::XML => String::from(p),
     }
 }
 
-fn unwrap_list(unwrapped: String, block: &[u8]) -> String {
+fn unwrap_list(unwrapped: String, block: &str) -> String {
     let lead = RE_LI.captures(block).unwrap();
     let n_indent = lead[0].len();
     //println!("{}", String::from_utf8(lead[0]).unwrap());
-    unwrapped.push_str(std::str::from_utf8(&lead[0]).unwrap());
-    let str_indent = b" ".repeat(n_indent);
+    unwrapped.push_str(&lead[0]);
+    let str_indent = " ".repeat(n_indent);
     let beheaded = RE_LI.replace(block, str_indent);
     let next = RE_LI.find(&beheaded);
     let boundary: usize = match next {
         Some(mat) => mat.start(),
         None => beheaded.len(),
     };
-    let wrapped = std::str::from_utf8(&beheaded[..boundary]).unwrap();
-    unwrapped.push_str(&unfill(&dedent(wrapped)).0);
+    unwrapped.push_str(&unfill(&dedent(&beheaded[..boundary])).0);
     if block[boundary..].is_empty() {
         return unwrapped;
     }
