@@ -4,8 +4,6 @@ use std::str;
 
 const BLANK: &str = "\n\n";
 
-const RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
-
 pub fn unwrap(raw: &str) -> String {
     let old: Vec<&str> = raw.split(BLANK).collect();
     let ilast = old.len() - 1;
@@ -70,7 +68,7 @@ pub fn unwrap(raw: &str) -> String {
     return new;
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 enum ParagraphType {
     // Continuation of e.g. XML or a Markdown list.
     // Identifiable at head only.
@@ -96,21 +94,29 @@ enum ParagraphType {
 fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
     match ptype {
         ParagraphType::Indented => String::from(p),
-        ParagraphType::List => unwrap_list(String::new(), &p),
+        ParagraphType::List => unwrap_list(&p),
         ParagraphType::Text => String::from(unfill(p).0),
         ParagraphType::Whitespace => String::from(p),
         ParagraphType::XML => String::from(p),
     }
 }
 
-fn unwrap_list(unwrapped: String, block: &str) -> String {
-    let lead = RE_LI.captures(block).unwrap();
+fn unwrap_list(block: &str) -> String {
+    let new = String::new();
+    return unwrap_bullets(new, block);
+}
+
+fn unwrap_bullets(mut unwrapped: String, block: &str) -> String {
+    // TODO: static optimization.
+    let re_li: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
+
+    let lead = re_li.captures(block).unwrap();
     let n_indent = lead[0].len();
     //println!("{}", String::from_utf8(lead[0]).unwrap());
     unwrapped.push_str(&lead[0]);
     let str_indent = " ".repeat(n_indent);
-    let beheaded = RE_LI.replace(block, str_indent);
-    let next = RE_LI.find(&beheaded);
+    let beheaded = re_li.replace(block, str_indent);
+    let next = re_li.find(&beheaded);
     let boundary: usize = match next {
         Some(mat) => mat.start(),
         None => beheaded.len(),
@@ -119,7 +125,7 @@ fn unwrap_list(unwrapped: String, block: &str) -> String {
     if block[boundary..].is_empty() {
         return unwrapped;
     }
-    return unwrap_list(unwrapped, &block[boundary..]);
+    return unwrap_bullets(unwrapped, &block[boundary..]);
 }
 
 fn classify_head(subject: &str) -> ParagraphType {

@@ -104,7 +104,7 @@ fn unwrap_xmlonly_2paragraph() {
 
 #[test]
 fn unwrap_mixed_preunwrapped() {
-    const VAL: &str = r#"An HTML document should contain, at minimum:
+    const UNWRAPPED: &str = r#"An HTML document should contain, at minimum:
 
 <!DOCTYPE html>
 <html lang="en">
@@ -112,7 +112,8 @@ fn unwrap_mixed_preunwrapped() {
   <head>
     <meta charset="utf-8">
     <title>title</title>
-    <link rel="stylesheet" href="nine_hundred_years_and_two_months_of_bikeshedding_and_cozy_chats.css">
+    <link rel="stylesheet"
+          href="nine_hundred_years_and_two_months_of_bikeshedding_and_cozy_chats.css">
     <script src="script.js"></script>
   </head>
 
@@ -139,5 +140,45 @@ Observe:
 Three cheers for UTF-8!
 
 "#;
-    assert_eq!(VAL, runwrap::unwrap(VAL));
+    const WRAPPED: &str = r#"An HTML document should
+contain, at minimum:
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet"
+          href="nine_hundred_years_and_two_months_of_bikeshedding_and_cozy_chats.css">
+    <script src="script.js"></script>
+  </head>
+
+  <body>
+    ...
+  </body>
+
+</html>
+
+### Details on each section
+
+Observe:
+
+* The stated “charset” is in part
+  a fallback in the absence of an HTTP server header.
+  * It’s useful when:
+    * The server is broken.
+    * There is no server.
+
+      This is often the case in local development.
+ * If the “charset” is omitted from the HTML, old specifications say the default
+   is ISO-8859-1, but user preference tends to win out,
+   and now there’s UTF-8.
+
+
+
+Three cheers for UTF-8!
+
+"#;
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
 }
