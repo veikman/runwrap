@@ -1,4 +1,4 @@
-use textwrap::{unfill, dedent};
+use textwrap::unfill;
 use regex::Regex;
 use std::str;
 
@@ -95,7 +95,9 @@ fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
     match ptype {
         ParagraphType::Indented => String::from(p),
         ParagraphType::List => unwrap_list(&p),
-        ParagraphType::Text => String::from(unfill(p).0),
+        // Do not tolerate a hanging indent on a regular text block.
+        // TODO: Ignore such blocks or describe the problem.
+        ParagraphType::Text => unwrap_prefixed(p, false),
         ParagraphType::Whitespace => String::from(p),
         ParagraphType::XML => String::from(p),
     }
@@ -121,7 +123,7 @@ fn unwrap_bullets(mut unwrapped: String, block: &str) -> String {
         Some(mat) => mat.start(),
         None => beheaded.len(),
     };
-    unwrapped.push_str(&unfill(&dedent(&beheaded[..boundary])).0);
+    unwrapped.push_str(&unwrap_prefixed(&beheaded[..boundary], true));
     if block[boundary..].is_empty() {
         return unwrapped;
     }
@@ -159,6 +161,19 @@ fn classify_tail(subject: &str) -> ParagraphType {
     } else {
         return ParagraphType::Text
     }
+}
+
+/// Preserve initial indentation on unwrapping.
+/// Check for subsequent indentation, either requiring it (for e.g. list items) or forbidding it
+/// (in cases where it would not be recoverable on wrapping).
+fn unwrap_prefixed(raw: &str, indented: bool) -> String {
+    let (content, properties) = unfill(raw);
+    if indented {
+        assert!(!(properties.subsequent_indent.is_empty()));
+    } else {
+        assert!(properties.subsequent_indent.is_empty());
+    }
+    return String::from(properties.initial_indent) + &content;
 }
 
 #[test]

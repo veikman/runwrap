@@ -9,8 +9,12 @@ were dumb about my absence.";
     assert_eq!(OUT, unfill(IN).0);
 }
 
+/// Characterize the way textwrap::unfill responds to a typical Markdown
+/// heading.
 #[test]
-fn unfill_markdown_heading() {
-    const IN: &str = "## History";
-    assert_eq!(IN, unfill(IN).0);
+fn unfill_markdown_heading_default() {
+    let (filled, options) = unfill("## History");
+    assert_eq!("History", filled);
+    assert_eq!("## ", options.initial_indent);
+    assert_eq!("", options.subsequent_indent);
 }
