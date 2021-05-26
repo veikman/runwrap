@@ -1,4 +1,5 @@
 use runwrap;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn unwrap_empty() {
@@ -59,6 +60,12 @@ fn unwrap_textonly_2paragraph_wrapped() {
 
 “Ah, then, I hope her youth and her beauty helped her!” I recollect throwing off.\n“He\nseems\nto like us young and pretty!”";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
+
+#[test]
+fn unwrap_markdown_heading() {
+    const VAL: &str = "## History";
+    assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
 #[test]

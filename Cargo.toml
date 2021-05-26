@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 regex = "1"
 textwrap = "0.13"
+
+[dev-dependencies]
+pretty_assertions = "0"
