@@ -69,13 +69,26 @@ fn unwrap_markdown_heading() {
 }
 
 #[test]
+fn unwrap_markdown_list_unordered_preunwrapped() {
+    const VAL: &str = "* “From you—from you!” she cried.";
+    assert_eq!(VAL, runwrap::unwrap(VAL));
+}
+
+#[test]
+fn unwrap_markdown_list_unordered() {
+    const UNWRAPPED: &str = "* “From you—from you!” she cried.";
+    const WRAPPED: &str = "* “From you—from you!”\nshe cried.";
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
+
+#[test]
 fn unwrap_xmlonly_1paragraph_1element() {
     const VAL: &str = r#"<?xml version="1.0" standalone='yes'?>"#;
     assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
 #[test]
-fn unwrap_xmlonly_1paragraph_multielement() {
+fn unwrap_htmlonly_1paragraph_multielement() {
     const VAL: &str = r#"<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -92,7 +105,7 @@ fn unwrap_xmlonly_1paragraph_multielement() {
 }
 
 #[test]
-fn unwrap_xmlonly_2paragraph() {
+fn unwrap_htmlonly_2paragraph() {
     const VAL: &str = r#"<!DOCTYPE html>
 <html lang="en">
   <head>

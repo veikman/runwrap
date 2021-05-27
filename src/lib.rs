@@ -6,7 +6,7 @@ use textwrap::unfill;
 const BLANK: &str = "\n\n";
 
 lazy_static! {
-    static ref RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
+    static ref RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|[1-9]\d*\.) )").unwrap();
 }
 
 pub fn unwrap(raw: &str) -> String {
@@ -73,7 +73,7 @@ pub fn unwrap(raw: &str) -> String {
     return new;
 }
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 enum ParagraphType {
     // Continuation of e.g. XML or a Markdown list.
     // Identifiable at head only.
@@ -117,7 +117,6 @@ fn unwrap_bullets(mut unwrapped: String, block: &str) -> String {
 
     let lead = RE_LI.captures(block).unwrap();
     let n_indent = lead[0].len();
-    //println!("{}", String::from_utf8(lead[0]).unwrap());
     unwrapped.push_str(&lead[0]);
     let str_indent = " ".repeat(n_indent);
     let beheaded = RE_LI.replace(block, str_indent);
@@ -138,17 +137,18 @@ fn classify_head(subject: &str) -> ParagraphType {
     if trimmed.is_empty() {
         // Extraneous, unclassifiable whitespace to be left untouched.
         return ParagraphType::Whitespace
-    } else if trimmed != subject {
-        // Starts with whitespace but is not all whitespace.
-        // To be appended to a multi-paragraph block before other treatment.
-        return ParagraphType::Indented
-    } else if subject.starts_with("<") {
-        // XML-like.
-        return ParagraphType::XML
     } else if RE_LI.is_match(subject) {
         // Bullet list. Markdown-like.
         // TODO: Apply a secondary version of the regex here that is NOT multiline.
         return ParagraphType::List
+    } else if trimmed != subject {
+        // Starts with whitespace but is not all whitespace or a list item.
+        // To be appended to a multi-paragraph block before other treatment.
+        return ParagraphType::Indented
+    } else if subject.starts_with("<") {
+        // XML-like.
+        // TODO: Implement CommonMark.
+        return ParagraphType::XML
     } else {
         // Default to wrappable text.
         return ParagraphType::Text
@@ -190,12 +190,18 @@ fn classification_as_whitespace() {
 #[test]
 fn classification_as_indented() {
     assert!(matches!(classify_head(" a"), ParagraphType::Indented));
+    assert!(matches!(classify_head("            a"), ParagraphType::Indented));
 }
 #[test]
 fn classification_as_list() {
     assert!(matches!(classify_head("* a"), ParagraphType::List));
     assert!(matches!(classify_head("- a"), ParagraphType::List));
     assert!(matches!(classify_head("+ a"), ParagraphType::List));
+    assert!(matches!(classify_head("  + a"), ParagraphType::List));
+    assert!(matches!(classify_head("1. a"), ParagraphType::List));
+    assert!(matches!(classify_head("2. a"), ParagraphType::List));
+    assert!(matches!(classify_head("10. a"), ParagraphType::List));
+    assert!(matches!(classify_head("10000. a"), ParagraphType::List));
 }
 #[test]
 fn classification_as_misc() {
@@ -206,4 +212,6 @@ fn classification_as_misc() {
     assert!(matches!(classify_head("a\na\n\na"), ParagraphType::Text));
     assert!(matches!(classify_head("^a"), ParagraphType::Text));
     assert!(matches!(classify_head("`a`"), ParagraphType::Text));
+    assert!(matches!(classify_head("0. a"), ParagraphType::Text));
+    assert!(matches!(classify_head("0. a"), ParagraphType::Text));
 }
