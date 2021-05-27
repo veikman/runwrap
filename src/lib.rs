@@ -1,8 +1,13 @@
-use textwrap::unfill;
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::str;
+use textwrap::unfill;
 
 const BLANK: &str = "\n\n";
+
+lazy_static! {
+    static ref RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
+}
 
 pub fn unwrap(raw: &str) -> String {
     let old: Vec<&str> = raw.split(BLANK).collect();
@@ -109,16 +114,14 @@ fn unwrap_list(block: &str) -> String {
 }
 
 fn unwrap_bullets(mut unwrapped: String, block: &str) -> String {
-    // TODO: static optimization.
-    let re_li: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|\d\.) )").unwrap();
 
-    let lead = re_li.captures(block).unwrap();
+    let lead = RE_LI.captures(block).unwrap();
     let n_indent = lead[0].len();
     //println!("{}", String::from_utf8(lead[0]).unwrap());
     unwrapped.push_str(&lead[0]);
     let str_indent = " ".repeat(n_indent);
-    let beheaded = re_li.replace(block, str_indent);
-    let next = re_li.find(&beheaded);
+    let beheaded = RE_LI.replace(block, str_indent);
+    let next = RE_LI.find(&beheaded);
     let boundary: usize = match next {
         Some(mat) => mat.start(),
         None => beheaded.len(),
@@ -142,9 +145,9 @@ fn classify_head(subject: &str) -> ParagraphType {
     } else if subject.starts_with("<") {
         // XML-like.
         return ParagraphType::XML
-    } else if subject.starts_with("* ") {
+    } else if RE_LI.is_match(subject) {
         // Bullet list. Markdown-like.
-        // TODO: More types: Leading numerals, dashes etc.
+        // TODO: Apply a secondary version of the regex here that is NOT multiline.
         return ParagraphType::List
     } else {
         // Default to wrappable text.
@@ -187,6 +190,12 @@ fn classification_as_whitespace() {
 #[test]
 fn classification_as_indented() {
     assert!(matches!(classify_head(" a"), ParagraphType::Indented));
+}
+#[test]
+fn classification_as_list() {
+    assert!(matches!(classify_head("* a"), ParagraphType::List));
+    assert!(matches!(classify_head("- a"), ParagraphType::List));
+    assert!(matches!(classify_head("+ a"), ParagraphType::List));
 }
 #[test]
 fn classification_as_misc() {
