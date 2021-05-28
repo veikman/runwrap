@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+fancy_regex = "1.6"
 lazy_static = "1.4"
-regex = "1"
 textwrap = "0.13"
 
 [dev-dependencies]

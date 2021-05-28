@@ -1,24 +1,42 @@
 use lazy_static::lazy_static;
-use regex::Regex;
+use fancy_regex::Regex;
 use std::str;
 use textwrap::unfill;
 
 const BLANK: &str = "\n\n";
 
+const REBASE_LI: &str = r"^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|[1-9]\d*\.) )";
+
 lazy_static! {
-    static ref RE_LI: Regex = Regex::new(r"(?m)^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|[1-9]\d*\.) )").unwrap();
+    static ref RE_LI: Regex = Regex::new("REBASE_LI").unwrap();
+    static ref RE_MLI: Regex = Regex::new("(?m)" + "REBASE_LI").unwrap();
+    static ref RE_LIBLOCK: Regex = Regex::new(format!("{li}.*{li}").unwrap();
+// Was gonna look ahead here to find the end of a block...   ^^^^
 }
 
 pub fn unwrap(raw: &str) -> String {
-    let old: Vec<&str> = raw.split(BLANK).collect();
-    let ilast = old.len() - 1;
-    let mut new = String::with_capacity(raw.len());
-    let mut block = String::new();
-    let mut type_last = ParagraphType::Whitespace;  // Ongoing block.
+    let mut blocks: Vec<ParagraphType> = Vec::new();
+    categorize(&mut blocks, raw);
+}
+
+
+fn categorize(mut coll: Vec<ParagraphType>, remainder: &str):
+    if remainder.trim().is_empty():
+        // Only whitespace remains.
+        return
+
+    //let old: Vec<&str> = raw.split(BLANK).collect();
+    //let ilast = old.len() - 1;
     for (i, p) in old.iter().enumerate() {
         let type_head = classify_head(p);
         let mut ends_previous_block = false;  // True if p shows that a previous block that does not include p is over.
         let mut ends_current_block = false;  // True if p is itself the end of a block.
+
+        blocks[i]
+        
+    let mut new = String::with_capacity(raw.len());
+    let mut block = String::new();
+    let mut type_last = ParagraphType::Whitespace;  // Ongoing block.
 
         if type_last == ParagraphType::List {
             // Can only be ended by non-indented subsequent paragraph.
@@ -73,27 +91,32 @@ pub fn unwrap(raw: &str) -> String {
     return new;
 }
 
+struct Block {
+    start: usize,
+    end: usize
+}
+
 #[derive(PartialEq, Copy, Clone, Debug)]
 enum ParagraphType {
     // Continuation of e.g. XML or a Markdown list.
     // Identifiable at head only.
     // Indented text should end a wrappable block at end of document only.
-    Indented,
+    Indented(Block),
 
     // Markdown-like list item.
     // Beginning of block is identifiable at head, end of block only by the start of a new
     // paragraph, outside the list, that is not indented.
-    List,
+    List(Block),
 
     // General running text. One paragraph of this is always considered a complete block.
-    Text,
+    Text(Block),
 
     // Paragraph apparently composed entirely of whitespace.
-    // Trash to be ignored.
+    // Trash to be ignored. No block info.
     Whitespace,
 
     // XML/HTML block. Begins and ends with XML-style tags (<...>).
-    XML,
+    XML(Block),
 }
 
 fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
@@ -137,9 +160,12 @@ fn classify_head(subject: &str) -> ParagraphType {
     if trimmed.is_empty() {
         // Extraneous, unclassifiable whitespace to be left untouched.
         return ParagraphType::Whitespace
-    } else if RE_LI.is_match(subject) {
+    }
+
+    match RE_LI.find(subject) {
+        Some()
+    if RE_LI.is_match(subject) {
         // Bullet list. Markdown-like.
-        // TODO: Apply a secondary version of the regex here that is NOT multiline.
         return ParagraphType::List
     } else if trimmed != subject {
         // Starts with whitespace but is not all whitespace or a list item.
