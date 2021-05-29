@@ -1,195 +1,43 @@
-use lazy_static::lazy_static;
-use fancy_regex::Regex;
-use std::str;
+use std::ops::Range;
 use textwrap::unfill;
-
-const BLANK: &str = "\n\n";
-
-const REBASE_LI: &str = r"^(?P<indentation>[ ]*)(?P<bullet>(:?[*+-]|[1-9]\d*\.) )";
-
-lazy_static! {
-    static ref RE_LI: Regex = Regex::new("REBASE_LI").unwrap();
-    static ref RE_MLI: Regex = Regex::new("(?m)" + "REBASE_LI").unwrap();
-    static ref RE_LIBLOCK: Regex = Regex::new(format!("{li}.*{li}").unwrap();
-// Was gonna look ahead here to find the end of a block...   ^^^^
-}
+use pulldown_cmark::{Event, Options, Parser, Tag};
 
 pub fn unwrap(raw: &str) -> String {
-    let mut blocks: Vec<ParagraphType> = Vec::new();
-    categorize(&mut blocks, raw);
+    let ret = zip(raw);
+    return ret;
 }
 
+// Act as a predicate to identify paragraphs.
+fn pred((e, _): &(Event, Range<usize>)) -> bool {
+    matches!(e, Event::Start(Tag::Paragraph))
+}
+// Select ranges filtered by pred().
+fn pick((_, r): (Event, Range<usize>)) -> Range<usize> {
+    r
+}
 
-fn categorize(mut coll: Vec<ParagraphType>, remainder: &str):
-    if remainder.trim().is_empty():
-        // Only whitespace remains.
-        return
+/// Join together modified paragraphs and other content using a pulldown-cmark event stream.
+fn zip(raw: &str) -> String {
+    let mut new = String::new();
+    let mut lastoffset: usize = 0;
 
-    //let old: Vec<&str> = raw.split(BLANK).collect();
-    //let ilast = old.len() - 1;
-    for (i, p) in old.iter().enumerate() {
-        let type_head = classify_head(p);
-        let mut ends_previous_block = false;  // True if p shows that a previous block that does not include p is over.
-        let mut ends_current_block = false;  // True if p is itself the end of a block.
+    // pranges is an iterable of Ranges describing the beginning and ending of every paragraph of
+    // text in the original document.
+    let pranges = Parser::new_ext(raw, Options::empty()).into_offset_iter().filter(pred).map(pick);
 
-        blocks[i]
-        
-    let mut new = String::with_capacity(raw.len());
-    let mut block = String::new();
-    let mut type_last = ParagraphType::Whitespace;  // Ongoing block.
-
-        if type_last == ParagraphType::List {
-            // Can only be ended by non-indented subsequent paragraph.
-            if type_head != ParagraphType::Indented {
-                ends_previous_block = true;
-            }
-            // Else maintain type_last.
-        } else if type_head == ParagraphType::List {
-            // New list. Wait and see.
-        } else if type_last == ParagraphType::XML || type_head == ParagraphType::XML {
-            let type_tail = classify_tail(p);
-            if type_tail == ParagraphType::XML {
-                // Unindented XML tag ends current paragraph.
-                ends_current_block = true;
-            } else {
-                type_last = ParagraphType::XML;
-            }
-        } else {
-            // There was no block-level structure in progress
-            // and none has just started.
-            ends_current_block = true;
+    // Combine untouched and retouched strings like a zip fastener.
+    for range in pranges {
+        if lastoffset < range.start {
+            new.push_str(&raw[lastoffset..range.start]);
         }
-
-        assert!(!(ends_previous_block && ends_current_block));
-
-        if ends_previous_block {
-            // Treat completed block. Append to output.
-            new.push_str(&unwrap_paragraph(type_last, &block));
-            if i < ilast {
-                new.push_str(BLANK);
-            }
-            // Start new block.
-            block = String::new();
-            // Base future expectations on the current paragraph.
-            type_last = type_head;
-        }
-        block.push_str(p);
-        if ends_current_block {
-            new.push_str(&unwrap_paragraph(type_head, &block));
-            if i < ilast {
-                new.push_str(BLANK);
-            }
-            block = String::new();
-            type_last = ParagraphType::Whitespace;
-        }
+        new.push_str(&unwrap_prefixed(&raw[range.start..range.end], false));
+        lastoffset = range.end;
     }
-    // Append any block not already finished, such as a Markdown list that ends the document, or an
-    // XML block that is not properly terminated.
-    if ! block.is_empty() {
-        new.push_str(&unwrap_paragraph(type_last, &block));
+    if lastoffset < raw.len() {
+        new.push_str(&raw[lastoffset..raw.len()]);
     }
+
     return new;
-}
-
-struct Block {
-    start: usize,
-    end: usize
-}
-
-#[derive(PartialEq, Copy, Clone, Debug)]
-enum ParagraphType {
-    // Continuation of e.g. XML or a Markdown list.
-    // Identifiable at head only.
-    // Indented text should end a wrappable block at end of document only.
-    Indented(Block),
-
-    // Markdown-like list item.
-    // Beginning of block is identifiable at head, end of block only by the start of a new
-    // paragraph, outside the list, that is not indented.
-    List(Block),
-
-    // General running text. One paragraph of this is always considered a complete block.
-    Text(Block),
-
-    // Paragraph apparently composed entirely of whitespace.
-    // Trash to be ignored. No block info.
-    Whitespace,
-
-    // XML/HTML block. Begins and ends with XML-style tags (<...>).
-    XML(Block),
-}
-
-fn unwrap_paragraph(ptype: ParagraphType, p: &str) -> String {
-    match ptype {
-        ParagraphType::Indented => String::from(p),
-        ParagraphType::List => unwrap_list(&p),
-        // Do not tolerate a hanging indent on a regular text block.
-        // TODO: Ignore such blocks or describe the problem.
-        ParagraphType::Text => unwrap_prefixed(p, false),
-        ParagraphType::Whitespace => String::from(p),
-        ParagraphType::XML => String::from(p),
-    }
-}
-
-fn unwrap_list(block: &str) -> String {
-    let new = String::new();
-    return unwrap_bullets(new, block);
-}
-
-fn unwrap_bullets(mut unwrapped: String, block: &str) -> String {
-
-    let lead = RE_LI.captures(block).unwrap();
-    let n_indent = lead[0].len();
-    unwrapped.push_str(&lead[0]);
-    let str_indent = " ".repeat(n_indent);
-    let beheaded = RE_LI.replace(block, str_indent);
-    let next = RE_LI.find(&beheaded);
-    let boundary: usize = match next {
-        Some(mat) => mat.start(),
-        None => beheaded.len(),
-    };
-    unwrapped.push_str(&unwrap_prefixed(&beheaded[..boundary], true));
-    if block[boundary..].is_empty() {
-        return unwrapped;
-    }
-    return unwrap_bullets(unwrapped, &block[boundary..]);
-}
-
-fn classify_head(subject: &str) -> ParagraphType {
-    let trimmed: &str = subject.trim_start();
-    if trimmed.is_empty() {
-        // Extraneous, unclassifiable whitespace to be left untouched.
-        return ParagraphType::Whitespace
-    }
-
-    match RE_LI.find(subject) {
-        Some()
-    if RE_LI.is_match(subject) {
-        // Bullet list. Markdown-like.
-        return ParagraphType::List
-    } else if trimmed != subject {
-        // Starts with whitespace but is not all whitespace or a list item.
-        // To be appended to a multi-paragraph block before other treatment.
-        return ParagraphType::Indented
-    } else if subject.starts_with("<") {
-        // XML-like.
-        // TODO: Implement CommonMark.
-        return ParagraphType::XML
-    } else {
-        // Default to wrappable text.
-        return ParagraphType::Text
-    }
-}
-
-fn classify_tail(subject: &str) -> ParagraphType {
-    // Like classify_head but for the end of an apparent paragraph.
-    if subject.trim().is_empty() {
-        return ParagraphType::Whitespace
-    } else if subject.ends_with(">") {
-        return ParagraphType::XML
-    } else {
-        return ParagraphType::Text
-    }
 }
 
 /// Preserve initial indentation on unwrapping.
@@ -203,41 +51,4 @@ fn unwrap_prefixed(raw: &str, indented: bool) -> String {
         assert!(properties.subsequent_indent.is_empty());
     }
     return String::from(properties.initial_indent) + &content;
-}
-
-#[test]
-fn classification_as_whitespace() {
-    assert!(matches!(classify_head(""), ParagraphType::Whitespace));
-    assert!(matches!(classify_head(" "), ParagraphType::Whitespace));
-    assert!(matches!(classify_head(" \n"), ParagraphType::Whitespace));
-    assert!(matches!(classify_head("\n\n"), ParagraphType::Whitespace));
-    assert!(matches!(classify_head("\n \n\n"), ParagraphType::Whitespace));
-}
-#[test]
-fn classification_as_indented() {
-    assert!(matches!(classify_head(" a"), ParagraphType::Indented));
-    assert!(matches!(classify_head("            a"), ParagraphType::Indented));
-}
-#[test]
-fn classification_as_list() {
-    assert!(matches!(classify_head("* a"), ParagraphType::List));
-    assert!(matches!(classify_head("- a"), ParagraphType::List));
-    assert!(matches!(classify_head("+ a"), ParagraphType::List));
-    assert!(matches!(classify_head("  + a"), ParagraphType::List));
-    assert!(matches!(classify_head("1. a"), ParagraphType::List));
-    assert!(matches!(classify_head("2. a"), ParagraphType::List));
-    assert!(matches!(classify_head("10. a"), ParagraphType::List));
-    assert!(matches!(classify_head("10000. a"), ParagraphType::List));
-}
-#[test]
-fn classification_as_misc() {
-    assert!(matches!(classify_head("a"), ParagraphType::Text));
-    assert!(matches!(classify_head("a "), ParagraphType::Text));
-    assert!(matches!(classify_head("a\na"), ParagraphType::Text));
-    assert!(matches!(classify_head("a\na\na"), ParagraphType::Text));
-    assert!(matches!(classify_head("a\na\n\na"), ParagraphType::Text));
-    assert!(matches!(classify_head("^a"), ParagraphType::Text));
-    assert!(matches!(classify_head("`a`"), ParagraphType::Text));
-    assert!(matches!(classify_head("0. a"), ParagraphType::Text));
-    assert!(matches!(classify_head("0. a"), ParagraphType::Text));
 }
