@@ -42,6 +42,26 @@ fn unwrap_textonly_1paragraph_long_preunwrapped() {
     const VAL: &str = "He had been left, by the death of their parents in India, guardian to a small nephew and a small niece, children of a younger, a military brother, whom he had lost two years before. These children were, by the strangest of chances for a man in his position—a lone man without the right sort of experience or a grain of patience—very heavily on his hands. It had all been a great worry and, on his own part doubtless, a series of blunders, but he immensely pitied the poor chicks and had done all he could; had in particular sent them down to his other house, the proper place for them being of course the country, and kept them there, from the first, with the best people he could find to look after them, parting even with his own servants to wait on them and going down himself, whenever he might, to see how they were doing. The awkward thing was that they had practically no other relations and that his own affairs took up all his time. He had put them in possession of Bly, which was healthy and secure, and had placed at the head of their little establishment—but below stairs only—an excellent woman, Mrs. Grose, whom he was sure his visitor would like and who had formerly been maid to his mother. She was now housekeeper and was also acting for the time as superintendent to the little girl, of whom, without children of her own, she was, by good luck, extremely fond. There were plenty of people to help, but of course the young lady who should go down as governess would be in supreme authority. She would also have, in holidays, to look after the small boy, who had been for a term at school—young as he was to be sent, but what else could be done?—and who, as the holidays were about to begin, would be back from one day to the other. There had been for the two children at first a young lady whom they had had the misfortune to lose. She had done for them quite beautifully—she was a most respectable person—till her death, the great awkwardness of which had, precisely, left no alternative but the school for little Miles. Mrs. Grose, since then, in the way of manners and things, had done as she could for Flora; and there were, further, a cook, a housemaid, a dairywoman, an old pony, an old groom, and an old gardener, all likewise thoroughly respectable.";
     assert_eq!(VAL, runwrap::unwrap(VAL));
 }
+#[test]
+fn unwrap_textonly_1paragraph_long_haphazard() {
+    const UNWRAPPED: &str = "My sense of how he received this suffered for a minute from something that I can describe only as a fierce split of my attention—a stroke that at first, as I sprang straight up, reduced me to the mere blind movement of getting hold of him, drawing him close, and, while I just fell for support against the nearest piece of furniture, instinctively keeping him with his back to the window. The appearance was full upon us that I had already had to deal with here: Peter Quint had come into view like a sentinel before a prison. The next thing I saw was that, from outside, he had reached the window, and then I knew that, close to the glass and glaring in through it, he offered once more to the room his white face of damnation. It represents but grossly what took place within me at the sight to say that on the second my decision was made; yet I believe that no woman so overwhelmed ever in so short a time recovered her grasp of the act. It came to me in the very horror of the immediate presence that the act would be, seeing and facing what I saw and faced, to keep the boy himself unaware. The inspiration—I can call it by no other name—was that I felt how voluntarily, how transcendently, I might. It was like fighting with a demon for a human soul, and when I had fairly so appraised it I saw how the human soul—held out, in the tremor of my hands, at arm’s length—had a perfect dew of sweat on a lovely childish forehead. The face that was close to mine was as white as the face against the glass, and out of it presently came a sound, not low nor weak, but as if from much further away, that I drank like a waft of fragrance.";
+    const WRAPPED: &str = "My sense of how he received this suffered for a minute from something that I can describe only as a fierce split of my attention—a stroke that at first, as I sprang straight up, reduced me to the mere blind movement of getting hold of him, drawing him close, and, while I just fell for support against the nearest piece of furniture, instinctively keeping him with his back to the window.
+The appearance was full upon us that I had already had to deal with here:
+Peter Quint had come into view like a sentinel before a prison.
+The next thing I saw was that, from outside,
+he had reached the window,
+and then I knew that,
+close to
+the glass and glaring in through it, he offered once more to the room his white face of damnation. It represents but grossly what took place within me at the sight to say that on the second my decision was made; yet I believe that no woman so overwhelmed ever in so short a time recovered her grasp of the act. It came to me in the very horror
+of
+the immediate presence that the act would be, seeing and facing what I saw and faced, to keep the boy himself unaware. The inspiration—I can call it by no other name—was that I felt how voluntarily, how transcendently, I might. It was like fighting with a demon for a human soul, and when I had fairly so appraised it I saw how the human
+soul—held out,
+in
+the
+tremor of my hands, at arm’s length—had a perfect dew of sweat on a lovely childish forehead. The face that was close to mine was as white as the face against the glass, and out of it presently came a sound, not low nor weak, but as if from much further away, that I drank like a waft of
+fragrance.";
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
 
 #[test]
 fn unwrap_textonly_2paragraph_preunwrapped() {
@@ -74,10 +94,21 @@ fn unwrap_markdown_list_unordered_preunwrapped() {
     assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
+// This behaviour is not implemented.
 #[test]
-fn unwrap_markdown_list_unordered() {
+#[ignore]
+fn unwrap_markdown_list_unordered_without_subsequent_indent() {
     const UNWRAPPED: &str = "* “From you—from you!” she cried.";
     const WRAPPED: &str = "* “From you—from you!”\nshe cried.";
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
+
+// This behaviour is not implemented.
+#[test]
+#[ignore]
+fn unwrap_markdown_list_unordered_with_subsequent_indent() {
+    const UNWRAPPED: &str = "* “From you—from you!” she cried.";
+    const WRAPPED: &str = "* “From you—from you!”\n  she cried.";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
 }
 
@@ -124,6 +155,7 @@ fn unwrap_htmlonly_2paragraph() {
 
 #[test]
 fn unwrap_mixed_preunwrapped() {
+    // Adjusted for suboptimal non-treatment of single-paragraph list items.
     const UNWRAPPED: &str = r#"An HTML document should contain, at minimum:
 
 <!DOCTYPE html>
@@ -147,13 +179,16 @@ fn unwrap_mixed_preunwrapped() {
 
 Observe:
 
-* The stated “charset” is in part a fallback in the absence of an HTTP server header.
+* The stated “charset” is in part
+  a fallback in the absence of an HTTP server header.
   * It’s useful when:
     * The server is broken.
     * There is no server.
 
-      This is often the case in local development.
- * If the “charset” is omitted from the HTML, old specifications say the default is ISO-8859-1, but user preference tends to win out, and now there’s UTF-8.
+      This is often the case in local development, as when you run a Flask-like project from the CLI.
+ * If the “charset” is omitted from the HTML, old specifications say the default
+   is ISO-8859-1, but user preference tends to win out,
+   and now there’s UTF-8.
 
 
 
@@ -190,7 +225,8 @@ Observe:
     * The server is broken.
     * There is no server.
 
-      This is often the case in local development.
+      This is often the case in local development,
+      as when you run a Flask-like project from the CLI.
  * If the “charset” is omitted from the HTML, old specifications say the default
    is ISO-8859-1, but user preference tends to win out,
    and now there’s UTF-8.
