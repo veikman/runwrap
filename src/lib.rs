@@ -1,11 +1,25 @@
 use std::ops::Range;
-use textwrap::unfill;
-use pulldown_cmark::{Event, Options, Parser, Tag};
+use textwrap::{unfill, fill, refill};
+use textwrap::Options as TextwrapOptions;
+use pulldown_cmark::{Event, Parser, Tag};
+use pulldown_cmark::Options as CmarkOptions;
+use partial_application::partial;
 
-pub fn unwrap(raw: &str) -> String {
-    let ret = zip(raw);
-    return ret;
+
+// Interface functions:
+
+pub fn wrap(raw: &str, new_width_or_options: TextwrapOptions) -> String {
+    zip(raw, partial!(fill => _, &new_width_or_options))
 }
+pub fn rewrap(raw: &str, new_width_or_options: TextwrapOptions) -> String {
+    zip(raw, partial!(refill => _, &new_width_or_options))
+}
+pub fn unwrap(raw: &str) -> String {
+    zip(raw, partial!(unwrap_prefixed => _))
+}
+
+
+// Internal functions:
 
 /// Act as a predicate to identify paragraphs.
 fn pred((e, _r): &(Event, Range<usize>)) -> bool {
@@ -16,11 +30,12 @@ fn pick((_e, r): (Event, Range<usize>)) -> Range<usize> {
     r
 }
 
-/// Join together modified paragraphs and other content using a pulldown-cmark event stream.
-fn zip(raw: &str) -> String {
+/// Join together modified paragraphs and other content.
+/// This uses a pulldown-cmark event stream and a closure acting upon each paragraph.
+fn zip<F: Fn(&str) -> String>(raw: &str, pfn: F) -> String {
     // “pranges” is an iterable of Ranges describing the beginning and ending of every paragraph of
     // text in the original document.
-    let pranges = Parser::new_ext(raw, Options::empty()).into_offset_iter().filter(pred).map(pick);
+    let pranges = Parser::new_ext(raw, CmarkOptions::empty()).into_offset_iter().filter(pred).map(pick);
 
     // Combine untouched and retouched strings like a zip fastener.
     let mut new = String::new();
@@ -29,7 +44,7 @@ fn zip(raw: &str) -> String {
         if lastoffset < range.start {
             new.push_str(&raw[lastoffset..range.start]);
         }
-        new.push_str(&unwrap_prefixed(&raw[range.start..range.end]));
+        new.push_str(&pfn(&raw[range.start..range.end]));
         lastoffset = range.end;
     }
     if lastoffset < raw.len() {
