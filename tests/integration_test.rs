@@ -4,40 +4,18 @@ use rstest::rstest;
 
 #[rstest]
 #[case("")]
+#[case(" ")]
+#[case("  ")]
+#[case("\n")]
+#[case("\n\n")]
+#[case("\n \n")]
+#[case("\n\n\n")]
+#[case("\n  \n\n ")]
+#[case("So far had Douglas presented his picture when someone put a question.")]
 fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
     assert_eq!(runwrap::rewrap(oracle, 72), oracle);
     assert_eq!(runwrap::unwrap(oracle), oracle);
-}
-
-#[test]
-fn unwrap_space() {
-    const VAL: &str = " ";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_1newline() {
-    const VAL: &str = "\n";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_2newline() {
-    const VAL: &str = "\n\n";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_3newline() {
-    const VAL: &str = "\n\n\n";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_textonly_1paragraph_1sentence_preunwrapped() {
-    const VAL: &str = "So far had Douglas presented his picture when someone put a question.";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
 #[test]
