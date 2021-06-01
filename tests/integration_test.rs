@@ -2,7 +2,7 @@ use runwrap;
 use pretty_assertions::assert_eq;
 use rstest::rstest;
 
-/// Check that certain types of content are unaffected.
+/// Check that certain types of content are unaffected by all operations.
 #[rstest]
 #[case("")]
 #[case(" ")]
@@ -74,6 +74,27 @@ fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
     assert_eq!(runwrap::rewrap(oracle, 72), oracle);
     assert_eq!(runwrap::unwrap(oracle), oracle);
+}
+
+/// Check going there and back again.
+#[rstest]
+#[case("Oh, how I looked at her now! “And did you see anyone?”
+
+“Ah, no!” she returned, almost with the full privilege of childish
+inconsequence, resentfully, though with a long sweetness in her little
+drawl of the negative.
+",
+"Oh, how I looked at her now! “And did you see anyone?”
+
+“Ah, no!” she returned, almost with the full privilege of childish inconsequence, resentfully, though with a long sweetness in her little drawl of the negative.
+")]
+fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
+    assert_eq!(runwrap::wrap(wrapped, 72), wrapped);
+    assert_eq!(runwrap::wrap(unwrapped, 72), wrapped);
+    assert_eq!(runwrap::rewrap(wrapped, 72), wrapped);
+    assert_eq!(runwrap::rewrap(unwrapped, 72), wrapped);
+    assert_eq!(runwrap::unwrap(wrapped), unwrapped);
+    assert_eq!(runwrap::unwrap(unwrapped), unwrapped);
 }
 
 #[test]
