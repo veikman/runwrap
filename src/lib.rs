@@ -1,6 +1,5 @@
 use std::ops::Range;
 use textwrap::{unfill, fill, refill};
-use textwrap::Options as TextwrapOptions;
 use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark::Options as CmarkOptions;
 use partial_application::partial;
@@ -8,11 +7,15 @@ use partial_application::partial;
 
 // Interface functions:
 
-pub fn wrap(raw: &str, new_width_or_options: TextwrapOptions) -> String {
-    zip(raw, partial!(fill => _, &new_width_or_options))
+// TODO: Expose the configuration interface of textwrap more fully, not just width.
+// This is not done yet because textwrap::Options does not implement Copy, nor From of borrowed
+// data, so it fits poorly into a closure.
+
+pub fn wrap(raw: &str, new_width: usize) -> String {
+    zip(raw, partial!(fill => _, new_width))
 }
-pub fn rewrap(raw: &str, new_width_or_options: TextwrapOptions) -> String {
-    zip(raw, partial!(refill => _, &new_width_or_options))
+pub fn rewrap(raw: &str, new_width: usize) -> String {
+    zip(raw, partial!(refill => _, new_width))
 }
 pub fn unwrap(raw: &str) -> String {
     zip(raw, partial!(unwrap_prefixed => _))
