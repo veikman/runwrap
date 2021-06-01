@@ -12,6 +12,32 @@ use rstest::rstest;
 #[case("\n\n\n")]
 #[case("\n  \n\n ")]
 #[case("So far had Douglas presented his picture when someone put a question.")]
+#[case(r#"<?xml version="1.0" standalone='yes'?>"#)]
+#[case(r#"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <!-- page content -->
+  </body>
+</html>"#)]  // HTML without intervening blank line.
+#[case(r#"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+  </head>
+
+  <body>
+    <!-- page content -->
+  </body>
+</html>"#)]  // HTML with intervening blank line.
 fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
     assert_eq!(runwrap::rewrap(oracle, 72), oracle);
@@ -91,47 +117,6 @@ fn unwrap_markdown_list_unordered_with_subsequent_indent() {
     const UNWRAPPED: &str = "* “From you—from you!” she cried.";
     const WRAPPED: &str = "* “From you—from you!”\n  she cried.";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
-}
-
-#[test]
-fn unwrap_xmlonly_1paragraph_1element() {
-    const VAL: &str = r#"<?xml version="1.0" standalone='yes'?>"#;
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_htmlonly_1paragraph_multielement() {
-    const VAL: &str = r#"<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>title</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-  </head>
-  <body>
-    <!-- page content -->
-  </body>
-</html>"#;
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_htmlonly_2paragraph() {
-    const VAL: &str = r#"<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>title</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-  </head>
-
-  <body>
-    <!-- page content -->
-  </body>
-</html>"#;
-    assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
 #[test]
