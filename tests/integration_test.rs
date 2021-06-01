@@ -1,10 +1,13 @@
 use runwrap;
 use pretty_assertions::assert_eq;
+use rstest::rstest;
 
-#[test]
-fn unwrap_empty() {
-    const VAL: &str = "";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
+#[rstest]
+#[case("")]
+fn idempotent(#[case] oracle: &str) {
+    assert_eq!(runwrap::wrap(oracle, 72), oracle);
+    assert_eq!(runwrap::rewrap(oracle, 72), oracle);
+    assert_eq!(runwrap::unwrap(oracle), oracle);
 }
 
 #[test]

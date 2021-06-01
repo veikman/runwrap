@@ -13,3 +13,4 @@ textwrap = "0.13"
 
 [dev-dependencies]
 pretty_assertions = "0"
+rstest = "0.10"
