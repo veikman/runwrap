@@ -49,6 +49,27 @@ use rstest::rstest;
     <p>Something in his tone and the expression of his face, as I got this from him, set my heart aching with such a pang as it had never yet known; so unutterably touching was it to see his little brain puzzled and his little resources taxed to play, under the spell laid on him, a part of innocence and consistency. “No, never—from the hour you came back. You’ve never mentioned to me one of your masters, one of your comrades, nor the least little thing that ever happened to you at school. Never, little Miles—no, never—have you given me an inkling of anything that may have happened there. Therefore you can fancy how much I’m in the dark. Until you came out, that way, this morning, you had, since the first hour I saw you, scarce even made a reference to anything in your previous life. You seemed so perfectly to accept the present.” It was extraordinary how my absolute conviction of his secret precocity (or whatever I might call the poison of an influence that I dared but half to phrase) made him, in spite of the faint breath of his inward trouble, appear as accessible as an older person—imposed him almost as an intellectual equal. “I thought you wanted to go on as you are.”</p>
   </body>
 </html>"#)]  // HTML with long unwrapped paragraphs of text.
+#[case(r#"“Well, then, finish it!”
+
+```rust
+#[case("He gazed up at me again. “Before what?”")]
+```
+
+“Before you came back. And before you went away.”"#)]  // Short fenced code block.
+#[case(r#"
+```
+She had helplessly gloomed at the upper regions. “You leave him—?”
+
+“So long with Quint? Yes—I don’t mind that now.”
+```
+"#)]  // Multiple short paragraphs in code block.
+#[case(r#"
+```
+“She’s not alone, and at such times she’s not a child: she’s an old, old woman.” I scanned all the visible shore while Mrs. Grose took again, into the queer element I offered her, one of her plunges of submission; then I pointed out that the boat might perfectly be in a small refuge formed by one of the recesses of the pool, an indentation masked, for the hither side, by a projection of the bank and by a clump of trees growing close to the water.
+
+“But if the boat’s there, where on earth’s she?” my colleague anxiously asked.
+```
+"#)]  // Multiple longer paragraphs in code block.
 fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
     assert_eq!(runwrap::rewrap(oracle, 72), oracle);
