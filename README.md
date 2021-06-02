@@ -1,7 +1,7 @@
 # `runwrap`
 
 This is a library to wrap and unwrap Markdown, both for ease of editing and for
-version control. It’s implemented in Rust.
+version control. It’s implemented in functional-style Rust.
 
 `runwrap` is based on the `textwrap` and `pulldown_cmark` crates. The latter is
 built to implement the CommonMark specification.
@@ -10,7 +10,7 @@ built to implement the CommonMark specification.
 
 * Wrapped text suitable for editing and version control.
 * Unwrapped text suitable for resolving complex markup.
-* Easy integration with higher-level languages.
+* Easy integration with higher-level languages and editors.
 * Idempotence.
 * Reasonable performance.
 
@@ -57,3 +57,9 @@ by `pulldown_cmark`, and is therefore ignored, even if it spans multiple lines.
 * Also
   ignored.
 ```
+
+## Legal
+
+Copyright 2021 Viktor Eikman
+
+`runwrap` is licensed as detailed in the accompanying file LICENSE.
