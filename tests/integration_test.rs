@@ -13,6 +13,7 @@ use rstest::rstest;
 #[case("\n\n\n")]
 #[case("\n  \n\n ")]
 #[case("So far had Douglas presented his picture when someone put a question.")]
+#[case("    How can I retrace today the strange steps of my obsession? There were times of our being together when I would have been ready to swear that, literally, in my presence, but with my direct sense of it closed, they had visitors who were known and were welcome. Then it was that, had I not been deterred by the very chance that such an injury might prove greater than the injury to be averted, my exultation would have broken out. “They’re here, they’re here, you little wretches,” I would have cried, “and you can’t deny it now!”.")]
 #[case(r#"<?xml version="1.0" standalone='yes'?>"#)]
 #[case(r#"<!DOCTYPE html>
 <html lang="en">
@@ -113,6 +114,16 @@ your head as to appeal to him for me—”
   She was really frightened. “Yes, miss?”
 * “I would leave, on the spot, both him and you.”
 ")]
+#[case("
+* I want my own sort!”
+
+  It literally made me bound forward. “There are not many of your own
+sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
+","
+* I want my own sort!”
+
+  It literally made me bound forward. “There are not many of your own sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
+")]
 fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
     assert_eq!(runwrap::wrap(wrapped, 72), wrapped);
     assert_eq!(runwrap::wrap(unwrapped, 72), wrapped);
@@ -162,7 +173,7 @@ fn unwrap_textonly_2paragraph_wrapped() {
 // This behaviour is not implemented.
 #[test]
 #[ignore]
-fn unwrap_markdown_list_unordered_without_subsequent_indent() {
+fn unwrap_list_unordered_without_subsequent_indent() {
     const UNWRAPPED: &str = "* “From you—from you!” she cried.";
     const WRAPPED: &str = "* “From you—from you!”\nshe cried.";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
@@ -171,9 +182,73 @@ fn unwrap_markdown_list_unordered_without_subsequent_indent() {
 // This behaviour is not implemented.
 #[test]
 #[ignore]
-fn unwrap_markdown_list_unordered_with_subsequent_indent() {
+fn unwrap_list_unordered_with_subsequent_indent() {
     const UNWRAPPED: &str = "* “From you—from you!” she cried.";
     const WRAPPED: &str = "* “From you—from you!”\n  she cried.";
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
+
+/// Check the scope of a width setting.
+/// As tested here, the setting applies locally to each paragraph, not to overall line width.
+/// This behaviour is suboptimal.
+#[test]
+fn wrap_list_unordered_nested_narrow() {
+    const UNWRAPPED: &str = "
+* What it was most impossible
+
+  to get rid of was the cruel idea that, whatever
+  * I had seen, Miles and
+
+    Flora saw more—things terrible and unguessable
+    * and that sprang from dreadful passages of
+
+      intercourse in the past.
+      * Such things naturally left
+        * on the surface, for the time, a chill which
+
+          we vociferously denied that we felt;
+          * and we had,
+            * all three,
+              * with repetition,
+                * got into such splendid training
+                  * that we went,
+                    * each time,
+                      * almost automatically,
+                        * to mark the close
+
+                          of the incident, through the very same movements.
+";
+    const WRAPPED: &str = "
+* What it was most impossible
+
+  to get rid of was the cruel idea that,
+whatever
+  * I had seen, Miles and
+
+    Flora saw more—things terrible and
+unguessable
+    * and that sprang from dreadful passages
+of
+
+      intercourse in the past.
+      * Such things naturally left
+        * on the surface, for the time, a chill
+which
+
+          we vociferously denied that we felt;
+          * and we had,
+            * all three,
+              * with repetition,
+                * got into such splendid training
+                  * that we went,
+                    * each time,
+                      * almost automatically,
+                        * to mark the close
+
+                          of the incident, through the very same
+movements.
+";
+    assert_eq!(WRAPPED, runwrap::wrap(UNWRAPPED, 40));
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
 }
 
