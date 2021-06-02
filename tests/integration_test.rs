@@ -70,6 +70,10 @@ She had helplessly gloomed at the upper regions. “You leave him—?”
 “But if the boat’s there, where on earth’s she?” my colleague anxiously asked.
 ```
 "#)]  // Multiple longer paragraphs in code block.
+#[case("## History")]  // Short heading; “##” are read as indentation by textwrap alone.
+#[case("## Night of the Day of the Dawn of the Son of the Bride of the Return of the Revenge of the Terror of the Attack of the Evil, Mutant, Alien, Flesh Eating, Hellbound, Zombified Living Dead Part 2: In Shocking 2-D")]  // Long heading
+#[case("* “From you—from you!” she cried.")]  // Trivial bullet list.
+#[test]
 fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
     assert_eq!(runwrap::rewrap(oracle, 72), oracle);
@@ -78,7 +82,8 @@ fn idempotent(#[case] oracle: &str) {
 
 /// Check going there and back again.
 #[rstest]
-#[case("Oh, how I looked at her now! “And did you see anyone?”
+#[case(
+"Oh, how I looked at her now! “And did you see anyone?”
 
 “Ah, no!” she returned, almost with the full privilege of childish
 inconsequence, resentfully, though with a long sweetness in her little
@@ -87,6 +92,26 @@ drawl of the negative.
 "Oh, how I looked at her now! “And did you see anyone?”
 
 “Ah, no!” she returned, almost with the full privilege of childish inconsequence, resentfully, though with a long sweetness in her little drawl of the negative.
+")]
+#[case(
+"* I quickly rose, and I think I must have shown her a queerer face than
+ever yet. “You see me asking him for a visit?” No, with her eyes on
+my face she evidently couldn’t. Instead of it even—as a woman reads
+another—she could see what I myself saw: his derision, his amusement,
+his contempt for the breakdown of my resignation at being left alone
+and for the fine machinery I had set in motion to attract his attention
+to my slighted charms. She didn’t know—no one knew—how proud I had been
+to serve him and to stick to our terms; yet she nonetheless took the
+measure, I think, of the warning I now gave her. “If you should so lose
+your head as to appeal to him for me—”
+
+  She was really frightened. “Yes, miss?”
+* “I would leave, on the spot, both him and you.”
+",
+"* I quickly rose, and I think I must have shown her a queerer face than ever yet. “You see me asking him for a visit?” No, with her eyes on my face she evidently couldn’t. Instead of it even—as a woman reads another—she could see what I myself saw: his derision, his amusement, his contempt for the breakdown of my resignation at being left alone and for the fine machinery I had set in motion to attract his attention to my slighted charms. She didn’t know—no one knew—how proud I had been to serve him and to stick to our terms; yet she nonetheless took the measure, I think, of the warning I now gave her. “If you should so lose your head as to appeal to him for me—”
+
+  She was really frightened. “Yes, miss?”
+* “I would leave, on the spot, both him and you.”
 ")]
 fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
     assert_eq!(runwrap::wrap(wrapped, 72), wrapped);
@@ -124,14 +149,6 @@ fragrance.";
 }
 
 #[test]
-fn unwrap_textonly_2paragraph_preunwrapped() {
-    const VAL: &str = "I can still see Mrs. Grose’s broad face as she took this in. “In Harley Street?”
-
-“In Harley Street.”";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
 fn unwrap_textonly_2paragraph_wrapped() {
     const UNWRAPPED: &str = "“The last governess? She was also young and pretty—almost as young and almost as pretty, miss, even as you.”
 
@@ -140,18 +157,6 @@ fn unwrap_textonly_2paragraph_wrapped() {
 
 “Ah, then, I hope her youth and her beauty helped her!” I recollect throwing off.\n“He\nseems\nto like us young and pretty!”";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
-}
-
-#[test]
-fn unwrap_markdown_heading() {
-    const VAL: &str = "## History";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
-}
-
-#[test]
-fn unwrap_markdown_list_unordered_preunwrapped() {
-    const VAL: &str = "* “From you—from you!” she cried.";
-    assert_eq!(VAL, runwrap::unwrap(VAL));
 }
 
 // This behaviour is not implemented.
