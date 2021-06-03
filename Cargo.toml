@@ -7,8 +7,8 @@ description = "Text wrapping for Markdown"
 readme = "README.md"
 repository = "https://github.com/veikman/runwrap"
 license = "GPL-3.0-or-later"
-license-file = "LICENSE"
 keywords = ["text", "markdown", "vcs"]
+include = ["src/", "LICENSE", "*.md"]
 
 [dependencies]
 partial_application = "0.2"
