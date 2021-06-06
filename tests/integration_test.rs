@@ -337,3 +337,14 @@ Three cheers for UTF-8!
 "#;
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
 }
+
+#[test]
+fn long_word() {
+    const UNWRAPPED: &str = "Check out this [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/) for mad SEO.";
+    const WRAPPED: &str = "Check out this
+[link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
+for mad SEO.";
+    assert_eq!(WRAPPED, runwrap::wrap(UNWRAPPED, 40));
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+
+}
