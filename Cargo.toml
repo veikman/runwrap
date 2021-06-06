@@ -13,7 +13,7 @@ include = ["src/", "LICENSE", "*.md"]
 [dependencies]
 partial_application = "0.2"
 pulldown-cmark = "0.8"
-textwrap = "0.13"
+textwrap = "0.14"
 
 [dev-dependencies]
 pretty_assertions = "0"
