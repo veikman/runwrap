@@ -124,6 +124,10 @@ sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
 
   It literally made me bound forward. “There are not many of your own sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
 ")]
+#[case("Check out this
+[link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
+for mad SEO.",  // The URL is treated as a single word and does not break.
+"Check out this [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/) for mad SEO.")]
 fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
     assert_eq!(runwrap::wrap(wrapped, 72), wrapped);
     assert_eq!(runwrap::wrap(unwrapped, 72), wrapped);
@@ -336,15 +340,4 @@ Three cheers for UTF-8!
 
 "#;
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
-}
-
-#[test]
-fn long_word() {
-    const UNWRAPPED: &str = "Check out this [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/) for mad SEO.";
-    const WRAPPED: &str = "Check out this
-[link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
-for mad SEO.";
-    assert_eq!(WRAPPED, runwrap::wrap(UNWRAPPED, 40));
-    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
-
 }
