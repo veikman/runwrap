@@ -96,13 +96,13 @@ drawl of the negative.
 ")]
 #[case(
 "* I quickly rose, and I think I must have shown her a queerer face than
-ever yet. “You see me asking him for a visit?” No, with her eyes on
-my face she evidently couldn’t. Instead of it even—as a woman reads
+ever yet. “You see me asking him for a visit?” No, with her eyes on my
+face she evidently couldn’t. Instead of it even—as a woman reads
 another—she could see what I myself saw: his derision, his amusement,
-his contempt for the breakdown of my resignation at being left alone
-and for the fine machinery I had set in motion to attract his attention
-to my slighted charms. She didn’t know—no one knew—how proud I had been
-to serve him and to stick to our terms; yet she nonetheless took the
+his contempt for the breakdown of my resignation at being left alone and
+for the fine machinery I had set in motion to attract his attention to
+my slighted charms. She didn’t know—no one knew—how proud I had been to
+serve him and to stick to our terms; yet she nonetheless took the
 measure, I think, of the warning I now gave her. “If you should so lose
 your head as to appeal to him for me—”
 
