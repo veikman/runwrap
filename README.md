@@ -12,6 +12,10 @@ designed to implement the CommonMark specification.
 * Idempotence.
 * Reasonable performance.
 
+## Bindings in other languages
+
+* Python: `punwrap` ([repo](https://github.com/veikman/punwrap)).
+
 ## Known defects
 
 The following may or may not be fixed and should therefore be considered
@@ -20,7 +24,7 @@ unstable behaviour.
 ### No advanced options
 
 Currently, only a maximum width can be specified for wrapping text. More
-advanced options cannot currently be passed to `textwrap`.
+advanced options cannot currently be passed through `runwrap` to `textwrap`.
 
 ### Width is applied locally to each paragraph
 
@@ -43,8 +47,8 @@ This is a regular paragraph.
 
 * This is a list item.
 
-  Because this list item consists of multiple paragraphs, it can be affected by
-  `runwrap`.
+  Because this list item consists of multiple paragraphs, it
+  (each of its two paragraphs) can be affected by `runwrap`.
 ```
 
 A list item made up of one paragraph of text is not identified as a paragraph
