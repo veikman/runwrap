@@ -1,6 +1,6 @@
 [package]
 name = "runwrap"
-version = "0.2.0-SNAPSHOT"
+version = "0.2.0"
 authors = ["Viktor Eikman <viktor.eikman@gmail.com>"]
 edition = "2018"
 description = "Text wrapping for Markdown"
