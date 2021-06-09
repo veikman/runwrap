@@ -124,6 +124,10 @@ sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
 
   It literally made me bound forward. “There are not many of your own sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
 ")]
+#[case(
+"> Of carrying on an intercourse that he conceals from me? Ah, remember
+that, until further evidence, I now accuse nobody.",
+"> Of carrying on an intercourse that he conceals from me? Ah, remember that, until further evidence, I now accuse nobody.")]
 #[case("Check out this
 [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
 for mad SEO.",  // The URL is treated as a single word and does not break.
