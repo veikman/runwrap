@@ -143,8 +143,11 @@ fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
 
 /// Characterize destructive effects.
 #[rstest]
-/// Whitespace directly following a paragraph before a newline is considered part of that paragraph
-/// and is destroyed on wrapping.
+/// A Markdown “soft break” (two trailing spaces) is unstable, which is a problem.
+#[case("“I know still less.”  ", "“I know still less.”", "“I know still less.”  ")]
+#[case("“I know\n  still less.”", "“I know\n  still less.”", "“I know still less.”")]
+/// A single piece of whitespace directly following a paragraph before a newline is considered part
+/// of that paragraph and is destroyed on wrapping, just like a soft break.
 #[case("“I know still less.” ", "“I know still less.”", "“I know still less.” ")]
 /// Similarly, whitespace following a newline inside a paragraph is destroyed on unwrapping.
 #[case("“I know\n still less.”", "“I know\n still less.”", "“I know still less.”")]
