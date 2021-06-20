@@ -50,6 +50,23 @@ use rstest::rstest;
     <p>Something in his tone and the expression of his face, as I got this from him, set my heart aching with such a pang as it had never yet known; so unutterably touching was it to see his little brain puzzled and his little resources taxed to play, under the spell laid on him, a part of innocence and consistency. “No, never—from the hour you came back. You’ve never mentioned to me one of your masters, one of your comrades, nor the least little thing that ever happened to you at school. Never, little Miles—no, never—have you given me an inkling of anything that may have happened there. Therefore you can fancy how much I’m in the dark. Until you came out, that way, this morning, you had, since the first hour I saw you, scarce even made a reference to anything in your previous life. You seemed so perfectly to accept the present.” It was extraordinary how my absolute conviction of his secret precocity (or whatever I might call the poison of an influence that I dared but half to phrase) made him, in spite of the faint breath of his inward trouble, appear as accessible as an older person—imposed him almost as an intellectual equal. “I thought you wanted to go on as you are.”</p>
   </body>
 </html>"#)]  // HTML with long unwrapped paragraphs of text.
+#[case(r#"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>From chapter IX</title>
+  </head>
+  <body>
+    <p>I can say now neither
+    what determined nor what
+    guided me, but I went
+    straight along the lobby,
+    holding my candle high,
+    till I came within sight
+    of the tall window that
+    presided over the great
+    turn of the staircase.</p>
+  </body>
+</html>"#)]  // HTML with long wrapped paragraph of text.
 #[case(r#"“Well, then, finish it!”
 
 ```rust
