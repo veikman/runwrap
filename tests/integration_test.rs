@@ -149,6 +149,16 @@ that, until further evidence, I now accuse nobody.",
 [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
 for mad SEO.",  // The URL is treated as a single word and does not break.
 "Check out this [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/) for mad SEO.")]
+#[case(
+"Not so dreadful as what <em>I</em> do,” I replied; on which I must have
+shown her—as I was indeed but too conscious—a front of miserable defeat.",  // Inline HTML.
+"Not so dreadful as what <em>I</em> do,” I replied; on which I must have shown her—as I was indeed but too conscious—a front of miserable defeat.",
+)]
+#[case(
+"Not so dreadful as what *I* do,” I replied; on which I must have shown
+her—as I was indeed but too conscious—a front of miserable defeat.",
+"Not so dreadful as what *I* do,” I replied; on which I must have shown her—as I was indeed but too conscious—a front of miserable defeat.",  // Markup for same HTML as above.
+)]
 fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
     assert_eq!(runwrap::wrap(wrapped, 72), wrapped);
     assert_eq!(runwrap::wrap(unwrapped, 72), wrapped);
@@ -226,6 +236,35 @@ fn unwrap_list_unordered_with_subsequent_indent() {
     const UNWRAPPED: &str = "* “From you—from you!” she cried.";
     const WRAPPED: &str = "* “From you—from you!”\n  she cried.";
     assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+}
+
+// This behaviour is not implemented.
+// Instead, see below how a set width is reused for each line.
+#[test]
+#[ignore]
+fn unwrap_list_ordered_complex() {
+    const UNWRAPPED: &str = "
+1.     After a little she turned round. “The person was in black, you say?”
+2. “In mourning—rather poor, almost shabby.
+    3. But—yes—with extraordinary beauty.”
+        4. I now recognized to what I had at last, stroke by stroke, brought the victim of my confidence, for she quite visibly weighed this.
+
+           “Oh, handsome—very, very,” I insisted; “wonderfully handsome. But infamous.”
+";
+    const WRAPPED: &str = "
+1.     After a little she turned round. “The person was in black, you
+   say?”
+2. “In mourning—rather poor, almost shabby.
+    2. But—yes—with extraordinary beauty.”
+        3. I now recognized to what I had at last, stroke by stroke,
+           brought the victim of my confidence, for she quite visibly
+           weighed this.
+
+           “Oh, handsome—very, very,” I insisted; “wonderfully
+           handsome. But infamous.”
+";
+    assert_eq!(UNWRAPPED, runwrap::unwrap(WRAPPED));
+    assert_eq!(WRAPPED, runwrap::wrap(UNWRAPPED, 72));
 }
 
 /// Check the scope of a width setting.
