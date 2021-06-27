@@ -91,6 +91,7 @@ She had helplessly gloomed at the upper regions. “You leave him—?”
 #[case("## History")]  // Short heading; “##” are read as indentation by textwrap alone.
 #[case("## Night of the Day of the Dawn of the Son of the Bride of the Return of the Revenge of the Terror of the Attack of the Evil, Mutant, Alien, Flesh Eating, Hellbound, Zombified Living Dead Part 2: In Shocking 2-D")]  // Long heading
 #[case("* “From you—from you!” she cried.")]  // Trivial bullet list.
+#[case("*  “From you—from you!” she cried.")]  // Same, indented.
 #[test]
 fn idempotent(#[case] oracle: &str) {
     assert_eq!(runwrap::wrap(oracle, 72), oracle);
@@ -142,6 +143,14 @@ sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
   It literally made me bound forward. “There are not many of your own sort, Miles!” I laughed. “Unless perhaps dear little Flora!”
 ")]
 #[case(
+"-  “Oh, of their rank, their condition”—she brought it woefully out. “*She*
+was a lady.”
+
+   I turned it over; I again saw. “Yes—she was a lady.”",
+"-  “Oh, of their rank, their condition”—she brought it woefully out. “*She* was a lady.”
+
+   I turned it over; I again saw. “Yes—she was a lady.”")]
+#[case(
 "> Of carrying on an intercourse that he conceals from me? Ah, remember
 that, until further evidence, I now accuse nobody.",
 "> Of carrying on an intercourse that he conceals from me? Ah, remember that, until further evidence, I now accuse nobody.")]
@@ -170,16 +179,29 @@ fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
 
 /// Characterize destructive effects.
 #[rstest]
-/// A Markdown “soft break” (two trailing spaces) is unstable, which is a problem.
+// A Markdown “soft break” (two trailing spaces) is unstable, which is a problem.
 #[case("“I know still less.”  ", "“I know still less.”", "“I know still less.”  ")]
 #[case("“I know\n  still less.”", "“I know\n  still less.”", "“I know still less.”")]
-/// A single piece of whitespace directly following a paragraph before a newline is considered part
+// A single piece of whitespace directly following a paragraph before a newline is considered part
 /// of that paragraph and is destroyed on wrapping, just like a soft break.
 #[case("“I know still less.” ", "“I know still less.”", "“I know still less.” ")]
-/// Similarly, whitespace following a newline inside a paragraph is destroyed on unwrapping.
+// Similarly, whitespace following a newline inside a paragraph is destroyed on unwrapping.
 #[case("“I know\n still less.”", "“I know\n still less.”", "“I know still less.”")]
+// Here, text similar to one of the twoway cases is modified to provoke a
+// situation where markup for emphasis resembles, but is not mistaken for, a bullet point.
+#[case(
+"* “Oh, of their rank, their condition”—she brought it woefully out. *She* was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”",
+"* “Oh, of their rank, their condition”—she brought it woefully out.
+*She* was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”",
+"* “Oh, of their rank, their condition”—she brought it woefully out. *She* was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”")]
 fn destructive(#[case] original: &str, #[case] wrapped: &str, #[case] unwrapped: &str) {
-    assert_eq!(runwrap::wrap(original, 72), wrapped);
+    assert_eq!(runwrap::wrap(original, 68), wrapped);
     assert_eq!(runwrap::unwrap(original), unwrapped);
 }
 
