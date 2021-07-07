@@ -200,6 +200,18 @@ fn twoway(#[case] wrapped: &str, #[case] unwrapped: &str) {
 "* “Oh, of their rank, their condition”—she brought it woefully out. *She* was a lady.
 
    I turned it over; I again saw. “Yes—she was a lady.”")]
+// Further modification for a numbered list.
+#[case(
+"1. “Oh, of their rank, their condition”—she brought it so woefully out. 2. She was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”",
+"1. “Oh, of their rank, their condition”—she brought it so woefully out.
+2. She was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”",
+"1. “Oh, of their rank, their condition”—she brought it so woefully out. 2. She was a lady.
+
+   I turned it over; I again saw. “Yes—she was a lady.”")]
 fn destructive(#[case] original: &str, #[case] wrapped: &str, #[case] unwrapped: &str) {
     assert_eq!(runwrap::wrap(original, 68), wrapped);
     assert_eq!(runwrap::unwrap(original), unwrapped);
