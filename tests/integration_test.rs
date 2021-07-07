@@ -154,6 +154,26 @@ was a lady.”
 "> Of carrying on an intercourse that he conceals from me? Ah, remember
 that, until further evidence, I now accuse nobody.",
 "> Of carrying on an intercourse that he conceals from me? Ah, remember that, until further evidence, I now accuse nobody.")]
+#[case(
+"I had by this time formed the habit of having Mrs. Grose literally well
+in hand in advance of my sounding that note; so that even now, as she
+bravely blinked under the signal of my word, I could keep her
+comparatively firm. “A talk! Do you mean she spoke?”
+
+> “It came to that. I found her, on my return, in the schoolroom.”
+>
+> “And what did she say?” I can hear the good woman still, and the candor
+of her stupefaction.
+
+“That she suffers the torments—!”",
+"I had by this time formed the habit of having Mrs. Grose literally well in hand in advance of my sounding that note; so that even now, as she bravely blinked under the signal of my word, I could keep her comparatively firm. “A talk! Do you mean she spoke?”
+
+> “It came to that. I found her, on my return, in the schoolroom.”
+>
+> “And what did she say?” I can hear the good woman still, and the candor of her stupefaction.
+
+“That she suffers the torments—!”",
+)]
 #[case("Check out this
 [link](https://viktor.eikman.se/article/nerd-argues-about-distinction-between-fantasy-and-science-fiction/)
 for mad SEO.",  // The URL is treated as a single word and does not break.
